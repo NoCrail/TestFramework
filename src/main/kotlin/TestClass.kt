@@ -1,10 +1,9 @@
 import MathFuncs.checkLinear
 import MathFuncs.checkSquare
-import annotations.NTestMethod
 import MathFuncs.solveLinearEquation
 import MathFuncs.solveSquareEquation
-
 import annotations.NTest
+import annotations.NTestMethod
 
 @NTest
 class TestClass {
@@ -17,17 +16,17 @@ class TestClass {
         return assertSquareSolutions(ans, coeffs)
     }
 
-    private fun assertSquareSolutions(ans: MutableCollection<Double>, coeffs: CoeffsInSquareEquation) :Boolean {
+    private fun assertSquareSolutions(ans: MutableCollection<Double>, coeffs: CoeffsInSquareEquation): Boolean {
         var assertion = true
-        ans.forEach{
-                if (!checkSquare(it, coeffs.a, coeffs.b, coeffs.c)) {
-                    assertion = false
-                }
+        ans.forEach {
+            if (!checkSquare(it, coeffs.a, coeffs.b, coeffs.c)) {
+                assertion = false
+            }
         }
         return assertion
     }
 
-    private fun assertLinearSolutions(ans: Double, coeffs: CoeffsInLinearEquation) :Boolean {
+    private fun assertLinearSolutions(ans: Double, coeffs: CoeffsInLinearEquation): Boolean {
         return checkLinear(ans, coeffs.k, coeffs.c)
     }
 
@@ -38,19 +37,20 @@ class TestClass {
         return assertLinearSolutions(ans, coeffs)
     }
 
-    fun notAnnotatedMethodHere(): String{
+
+    fun notAnnotatedMethodHere(): String {  //Метод для проверки аннотаций
         return "I'm here"
     }
 
     class CoeffsInSquareEquation(
-            val a : Double,
-            val b : Double,
-            val c : Double
+            val a: Double,
+            val b: Double,
+            val c: Double
     )
 
     class CoeffsInLinearEquation(
-            val k : Double,
-            val c : Double
+            val k: Double,
+            val c: Double
     )
 
 

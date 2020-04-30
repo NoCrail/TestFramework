@@ -13,7 +13,6 @@ object MathFuncs {
         return res
     }
 
-
     fun solveLinearEquation(k: Double, c: Double): Double {
         return -c / k
     }
