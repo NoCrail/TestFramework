@@ -30,6 +30,7 @@ class TestClass {
         return checkLinear(ans, coeffs.k, coeffs.c)
     }
 
+
     @NTestMethod
     fun testSolveLinearEquation(): Boolean {
         val coeffs = CoeffsInLinearEquation(1.0, 2.0)

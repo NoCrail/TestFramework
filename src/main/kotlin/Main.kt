@@ -10,55 +10,46 @@ import java.lang.reflect.Method
 
 fun main() {
 
-    val reflections = Reflections(
-            ConfigurationBuilder()
-                    .addUrls(ClasspathHelper.forPackage(""))
-                    .setScanners(TypeAnnotationsScanner(), SubTypesScanner(false)))
-
-    val allClasses = reflections.getSubTypesOf(Any::class.java)
-
-
-    allClasses.forEach { annotatedClass ->
-        findAnnotatedMethodsInAnnotatedClasses(annotatedClass)
-    }
-}
-
-
-fun findAnnotatedMethodsInAnnotatedClasses(annotatedClass: Class<out Any>) {   //Поиск классов с аннотацией NTest
-    val annotations = annotatedClass.annotations
-    annotations.forEach { annotation ->
-        val annotationClass = annotation.annotationClass.qualifiedName
-        if (annotationClass == NTest::class.qualifiedName) {
-            annotatedClass.methods.forEach { method ->
-                findAnnotatedMethods(method, annotatedClass)
-            }
-        }
-
-    }
-}
-
-fun findAnnotatedMethods(method: Method, annotatedClass: Class<out Any>) {       //Поиск методов с аннотацией NTestMethod в указанном классе
-    val methodAnnotations = method.annotations
-    methodAnnotations.forEach { methodAnnotation ->
-        val annotatedMethod = methodAnnotation.annotationClass.qualifiedName
-        if (annotatedMethod == NTestMethod::class.qualifiedName) {
-            callTestMethod(method, annotatedClass)
+    Reflect.getAllClasses().forEach { annotatedClass ->
+        annotatedClass.findAnnotatedMethodsInAnnotatedClasses().forEach {
+            println(buildCallInfo(it.name, annotatedClass.name, annotatedClass.testMethod(it)))
         }
     }
 }
 
-fun callTestMethod(method: Method, annotatedClass: Class<out Any>) {         //Вызов найденных методов
-    val result = method.invoke(annotatedClass.getConstructor().newInstance()).toString()
-    println(buildCallInfo(method.name, annotatedClass.name, result))
+
+object Reflect {
+    private val reflections =
+            Reflections(
+                    ConfigurationBuilder()
+                            .addUrls(ClasspathHelper.forPackage(""))
+                            .setScanners(
+                                    TypeAnnotationsScanner(),
+                                    SubTypesScanner(false)
+                            )
+            )
+
+    fun getAllClasses(): Set<Class<out Any>> = reflections.getSubTypesOf(Any::class.java)
 }
 
-fun buildCallInfo(methodName: String, className: String, result: String): String {       //Построение сообщения для вывода
-    val sb = StringBuilder()
-    sb.append("Called: ")
-    sb.append(methodName)
-    sb.append(" from ")
-    sb.append(className)
-    sb.append(" returned: ")
-    sb.append(result)
-    return sb.toString()
+
+//Поиск методов с аннотацией NTestMethod в классе с аннотацией NTest
+fun Class<out Any>.findAnnotatedMethodsInAnnotatedClasses(): Collection<Method> {
+    val m = mutableListOf<Method>()
+    if (getAnnotation(NTest::class.java) != null) {
+        methods.forEach { method ->
+            if (method.getAnnotation(NTestMethod::class.java) != null)
+                m.add(method)
+        }
+    }
+
+    return m
 }
+
+fun Class<out Any>.testMethod(method: Method): Any? =
+        method.invoke(getConstructor().newInstance())
+
+
+//Построение сообщения для вывода
+fun buildCallInfo(methodName: String, className: String, result: Any?): String =
+        "Called: $methodName from $className returned: $result"
